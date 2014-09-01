@@ -3,10 +3,7 @@
 *.ko
 *.obj
 *.elf
-
-# Libraries
-*.lib
-*.a
+*.img
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -21,3 +18,8 @@
 *.i*86
 *.x86_64
 *.hex
+
+build/
+game
+kernel.list
+kernel.map
