@@ -338,7 +338,7 @@ typedef unsigned long long int  uint64_t;
 /// Base Physical Address of the BCM 2835 peripheral registers
 #define BCM2835_PERI_BASE               0x20000000
 /// Base Physical Address of the System Timer registers
-#define BCM2835_ST_BASE			(BCM2835_PERI_BASE + 0x3000)
+#define BCM2835_ST_BASE					(BCM2835_PERI_BASE + 0x3000)
 /// Base Physical Address of the Pads registers
 #define BCM2835_GPIO_PADS               (BCM2835_PERI_BASE + 0x100000)
 /// Base Physical Address of the Clock/timer registers
@@ -348,13 +348,15 @@ typedef unsigned long long int  uint64_t;
 /// Base Physical Address of the SPI0 registers
 #define BCM2835_SPI0_BASE               (BCM2835_PERI_BASE + 0x204000)
 /// Base Physical Address of the BSC0 registers
-#define BCM2835_BSC0_BASE 		(BCM2835_PERI_BASE + 0x205000)
+#define BCM2835_BSC0_BASE 				(BCM2835_PERI_BASE + 0x205000)
 /// Base Physical Address of the PWM registers
 #define BCM2835_GPIO_PWM                (BCM2835_PERI_BASE + 0x20C000)
 /// Base Physical Address of the BSC1 registers
-#define BCM2835_BSC1_BASE		(BCM2835_PERI_BASE + 0x804000)
+#define BCM2835_BSC1_BASE				(BCM2835_PERI_BASE + 0x804000)
 /// Base Physical Address of the AUX registers
-#define BCM2835_AUX_BASE		(BCM2835_PERI_BASE + 0x215000)
+#define BCM2835_AUX_BASE				(BCM2835_PERI_BASE + 0x215000)
+/// Base Physical Address of the mailbox and framebuffer registers
+#define BCM2835_MAIL0_BASE				(BCM2835_PERI_BASE + 0xB880)
 
 
 /// Base of the ST (System Timer) registers.
@@ -392,6 +394,10 @@ extern volatile uint32_t *bcm2835_bsc1;
 /// Base of the AUX registers
 /// Available after bcm2835_init has been called
 extern volatile uint32_t *bcm2835_aux;
+
+/// Base of the mailbox registers
+/// Available after bcm2835_init has been called
+extern volatile uint32_t *bcm2835_mail;
 
 /// Size of memory page on RPi
 #define BCM2835_PAGE_SIZE               (4*1024)
@@ -780,6 +786,42 @@ typedef enum
 #define BCM2835_AUX_MU_STAT_REG 0x0064
 #define BCM2835_AUX_MU_BAUD_REG 0x0068
 
+// Defines for Framebuffer
+// http://elinux.org/RPi_Framebuffer
+#define BCM2835_MAIL0_READ		0x00
+#define BCM2835_MAIL0_PEAK		0x10
+#define BCM2835_MAIL0_SENDER	0x14
+#define BCM2835_MAIL0_STATUS	0x18
+#define BCM2835_MAIL0_CONFIG	0x1C
+#define BCM2835_MAIL0_WRITE		0x20
+
+#define BCM2835_MAIL0_STATUS_MAIL_EMPTY 	(1 << 30)
+#define BCM2835_MAIL0_STATUS_MAIL_FULL		(1 << 31)
+
+typedef enum 
+{
+	BCM2835_MAIL0_POWER_MANAGEMENT	= 0,
+	BCM2835_MAIL0_FRAMEBUFFER		= 1,
+	BCM2835_MAIL0_VIRTUAL_UART		= 2,
+	BCM2835_MAIL0_VCHIQ				= 3,
+	BCM2835_MAIL0_LED				= 4,
+	BCM2835_MAIL0_BUTTONS			= 5,
+	BCM2835_MAIL0_TOUCH_SCREEN		= 6
+} bcm2835Mail0Channels;
+
+struct fb_info
+{
+  volatile uint32_t width;
+  volatile uint32_t height;
+  volatile uint32_t virtual_width;
+  volatile uint32_t virtual_height;
+  volatile uint32_t pitch;
+  volatile uint32_t depth;
+  volatile uint32_t x_offset;
+  volatile uint32_t y_offset;
+  volatile uint32_t fb_pointer;
+  volatile uint32_t fb_size;
+};
 
 // Historical name compatibility
 #ifndef BCM2835_NO_DELAY_COMPATIBILITY
@@ -1297,6 +1339,11 @@ extern "C" {
 
 	extern void bcm2835_aux_muart_transfer_hexnl(uint32_t value);
 
+	extern void bcm2835_mail_write(uint8_t channel, uint32_t value);
+
+	extern uint32_t bcm2835_mail_read(uint8_t channel);
+
+	extern uint16_t* bcm2835_fb_init(uint32_t width, uint32_t height);
 	/// @} 
 #ifdef __cplusplus
 }

@@ -1,14 +1,33 @@
 #include "bcm2835.h"
-#include "ili9340.h"
 #include "raycasting.h"
+
+#define SCREEN_WIDTH 1024
+#define SCREEN_HEIGHT 768
+
+uint16_t* framebuffer;
 
 void draw_vert_line(int x, int y, int h, int color_mode)
 {
+	if (x >= SCREEN_WIDTH) x = SCREEN_WIDTH - 1;
+	if (x < 0) x = 0;
+	if (y >= SCREEN_HEIGHT) y = SCREEN_HEIGHT - 1;
+	if (y < 0) y = 0;
+	if (h < 0) h = 0;
+	if (y + h > SCREEN_HEIGHT) h = SCREEN_HEIGHT - y;
+
+	uint32_t i;
+
 	if (color_mode) {
-		ili9340_draw_line_v(x, y, h, ILI9340_RED);
-	} else { 
-		ili9340_draw_line_v(x, y, h, ILI9340_BLACK); 
+		for (i = y; i < y + h; i++)
+			framebuffer[i * SCREEN_WIDTH + x] = 0x7E0;
+	} else {
+		for (i = y; i < y + h; i++)
+			framebuffer[i * SCREEN_WIDTH + x] = 0x0;
 	}
+}
+
+void update_display(void)
+{
 }
 
 int run(void) 
@@ -16,14 +35,13 @@ int run(void)
 	bcm2835_init();
 	bcm2835_aux_muart_init();
 
-	ili9340_init();
-	ili9340_set_rotation(3);
+	// init LED 
+    bcm2835_gpio_fsel(16, BCM2835_GPIO_FSEL_OUTP); 
 
-	uint16_t screen_height = ili9340_get_height();
-	uint16_t screen_width = ili9340_get_width();
+	framebuffer = bcm2835_fb_init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	init_world(screen_width, screen_height);
-	cast_rays(draw_vert_line, ili9340_update_display); 
+	init_world(SCREEN_WIDTH, SCREEN_HEIGHT);
+	cast_rays(draw_vert_line, update_display); 
 
 	bcm2835_gpio_fsel(22, BCM2835_GPIO_FSEL_INPT); 
 	bcm2835_gpio_fsel(23, BCM2835_GPIO_FSEL_INPT); 
@@ -38,16 +56,13 @@ int run(void)
 	int pin23_state = 1;
 	int pin21_state = 1;
 	int pin18_state = 1;
-
-	// init LED 
-    bcm2835_gpio_fsel(16, BCM2835_GPIO_FSEL_OUTP); 
-
+	
 	while (1) {
-		// LED blinking
-        bcm2835_gpio_write(16, HIGH);
-        bcm2835_delayMicroseconds(20000);
-        bcm2835_gpio_write(16, LOW);
-        bcm2835_delayMicroseconds(20000);
+		//LED blinking
+        //bcm2835_gpio_write(16, HIGH);
+        //bcm2835_delay(1000);
+        //bcm2835_gpio_write(16, LOW);
+        //bcm2835_delay(1000);
 
 		bcm2835_aux_muart_transfernb("in the loop");
 		if (!bcm2835_gpio_lev(23) && pin23_state) {
@@ -83,7 +98,7 @@ int run(void)
 		}
 
 		move_player();
-		cast_rays(draw_vert_line, ili9340_update_display); 
+		cast_rays(draw_vert_line, update_display); 
 	}
 	return 0;
 }

@@ -31,6 +31,7 @@ volatile uint32_t *bcm2835_bsc0 = (volatile uint32_t *)MAP_FAILED;
 volatile uint32_t *bcm2835_bsc1 = (volatile uint32_t *)MAP_FAILED;
 volatile uint32_t *bcm2835_st	= (volatile uint32_t *)MAP_FAILED;
 volatile uint32_t *bcm2835_aux	= (volatile uint32_t *)MAP_FAILED;
+volatile uint32_t *bcm2835_mail	= (volatile uint32_t *)MAP_FAILED;
 
 
 // This variable allows us to test on hardware other than RPi.
@@ -1137,6 +1138,60 @@ void bcm2835_aux_muart_transfer_hexnl(uint32_t value)
 	bcm2835_aux_muart_transfer(0x0A);
 }
 
+void bcm2835_mail_write(uint8_t channel, uint32_t value)
+{
+	volatile uint32_t* paddr;
+	uint32_t message;
+    message = (value & 0xFFFFFFF0) + (channel & 0xF);
+	paddr = bcm2835_mail + BCM2835_MAIL0_STATUS/4;
+	while (bcm2835_peri_read_nb(paddr) & BCM2835_MAIL0_STATUS_MAIL_FULL)
+		;
+	paddr = bcm2835_mail + BCM2835_MAIL0_WRITE/4;
+	bcm2835_peri_write(paddr, message);
+}
+
+uint32_t bcm2835_mail_read(uint8_t channel)
+{
+	volatile uint32_t* paddr;
+	uint32_t message;
+	do {
+		paddr = bcm2835_mail + BCM2835_MAIL0_STATUS/4;
+		while (bcm2835_peri_read_nb(paddr) & BCM2835_MAIL0_STATUS_MAIL_EMPTY)
+			;
+		paddr = bcm2835_mail + BCM2835_MAIL0_READ/4;
+		message = bcm2835_peri_read_nb(paddr);
+	} while ((message & 0xF) != channel);
+	return (message & 0xFFFFFFF0);
+}
+
+uint16_t* bcm2835_fb_init(uint32_t width, uint32_t height)
+{
+	struct fb_info* info;
+	
+	// Static address for fb_info structure
+	info = (struct fb_info*)0x2000000;
+
+	info->width = width;
+	info->height = height;
+	info->virtual_width = width;
+	info->virtual_height = height;
+	info->x_offset = 0;
+	info->y_offset = 0;
+	info->depth = 16;
+
+	uint32_t message = (uint32_t)info + 0x40000000;
+	bcm2835_mail_write(BCM2835_MAIL0_FRAMEBUFFER, message);
+	message = bcm2835_mail_read(BCM2835_MAIL0_FRAMEBUFFER);
+	if (message != 0) {
+		// Debugging purposes
+		bcm2835_aux_muart_transfer_hex(message);
+		bcm2835_gpio_write(16, LOW);
+	}
+	
+	bcm2835_aux_muart_transfer_hex((uint32_t)info->fb_pointer);
+	return (uint16_t*)info->fb_pointer;
+}
+
 // Initialise this library.
 int bcm2835_init(void)
 {
@@ -1149,6 +1204,7 @@ int bcm2835_init(void)
 	bcm2835_bsc1 = (uint32_t*)BCM2835_BSC1_BASE;
 	bcm2835_st   = (uint32_t*)BCM2835_ST_BASE;
 	bcm2835_aux  = (uint32_t*)BCM2835_AUX_BASE;
+	bcm2835_mail = (uint32_t*)BCM2835_MAIL0_BASE;
 	return 1; // Success
 }
 

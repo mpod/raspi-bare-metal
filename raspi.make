@@ -9,7 +9,7 @@ MAP = kernel.map
 LINKER = link.ld
 START = $(SOURCE)start.s
 LIB = lib/
-OBJECTS := $(addprefix $(BUILD),bcm2835.o ili9340.o pitft.o qemu.o raycasting.o main.o)
+OBJECTS := $(addprefix $(BUILD),bcm2835.o ili9340.o pitft.o fb.o qemu.o raycasting.o main.o)
 
 all: $(LIST) $(TARGET)
 
@@ -30,6 +30,12 @@ pitft: clean $(BUILD) pitft-main all
 
 pitft-main:
 	$(ARMGNU)-gcc -Wall -nostdlib -nostartfiles -ffreestanding -std=gnu99 -DPITFT=1 -c $(SOURCE)main.c -o $(BUILD)main.o
+
+fb: OBJECTS = $(addprefix $(BUILD),bcm2835.o fb.o raycasting.o main.o)
+fb: clean $(BUILD) fb-main all
+
+fb-main:
+	$(ARMGNU)-gcc -Wall -nostdlib -nostartfiles -ffreestanding -std=gnu99 -DFB=1 -c $(SOURCE)main.c -o $(BUILD)main.o
 
 $(LIST) : $(BUILD)output.elf
 	$(ARMGNU)-objdump -d $(BUILD)output.elf > $(LIST)

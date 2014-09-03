@@ -4,8 +4,10 @@
 #include "qemu.h"
 #elif defined(PITFT)
 #include "pitft.h"
+#elif defined(FB)
+#include "fb.h"
 #else 
-#include "pitft.h"
+#include "fb.h"
 #endif
 
 int main(void)
