@@ -1161,7 +1161,7 @@ uint32_t bcm2835_mail_read(uint8_t channel)
 		paddr = bcm2835_mail + BCM2835_MAIL0_READ/4;
 		message = bcm2835_peri_read_nb(paddr);
 	} while ((message & 0xF) != channel);
-	return (message & 0xFFFFFFF0);
+	return message & 0xFFFFFFF0;
 }
 
 uint16_t* bcm2835_fb_init(uint32_t width, uint32_t height)
