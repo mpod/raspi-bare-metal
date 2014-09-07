@@ -137,5 +137,4 @@ Debugging of bare metal image on Raspberry Pi is not an easy task. The simplest 
 * [Linux Framebuffer drivers for small TFT LCD display modules](https://github.com/notro/fbtft)
 * [Library for the Adafruit 2.2" SPI display](https://github.com/adafruit/Adafruit_ILI9340)
 
-## Afterword ##
 
