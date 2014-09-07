@@ -22,8 +22,8 @@ qemu-main:
 $(QEMUTARGET): $(OBJECTS) $(BUILD)start.o $(LINKER)
 	$(ARMGNU)-ld --no-undefined -Map $(MAP) -T $(LINKER) -o kernel.elf $(BUILD)start.o $(OBJECTS) -L $(LIB) -lm -lc -lgcc
 
-runqemu: qemu
-	qemu-system-arm -m 128 -kernel kernel.elf -serial stdio
+runqemu: 
+	qemu-system-arm -m 128 -kernel kernel.elf -serial stdio -machine integratorcp
 
 pitft: OBJECTS = $(addprefix $(BUILD),bcm2835.o ili9340.o pitft.o raycasting.o main.o)
 pitft: clean $(BUILD) pitft-main all

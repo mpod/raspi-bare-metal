@@ -8,11 +8,17 @@ Purpose of this project is to get some experience with bare metal programming fo
 * Raspberry Pi kernel image that uses framebuffer, 
 * and Raspberry Pi kernel image that draws on Adafruit PiTFT display.
 
+<img src="https://raw.github.com/mpod/raspi-bare-metal/master/pitft.png"/>
+
 ## SDL reference implementation ##
+
+Install prerequisite packages, build, and run executable.
 
     $ sudo apt-get install libsdl2-2.0-0 libsdl2-dev
     $ make sdl
     $ ./game
+
+Moving controls: W, A, S, D.
 
 ## QEMU kernel image ##
 
@@ -45,6 +51,7 @@ Configure, build, install, and verify qemu-system-arm.
     $ make qemu
     $ make runqemu
   
+Moving controls: W, A, S, D.
 
 Framebuffer Raspberry Pi kernel image
 -------------------------------------
@@ -70,12 +77,21 @@ Copy file kernel.img onto the SD card. Plug PiTFT into your Raspberry Pi, insert
 References
 ----------
 
-This project is a compilation of knowledge from various places over Internet.
-
-* [SDL Documentation](http://aaaa/)
-* [ARM PrimeCell PS2 Keyboard/Mouse Interface (PL050)](http://aaaa)
-* [PrimeCell UART (PL011)](http://aaaa)
-* [PrimeCell Color LCD Controller (PL110)](http://aaaa)
-* [ILITEK ILI9341](http://aaaa)
+* [Ray-Casting Tutorial](http://www.permadi.com/tutorial/raycast/index.html)
+* [SDL Documentation](http://wiki.libsdl.org/CategoryAPI)
+* [QEMU Emulator User Documentation](http://wiki.qemu.org/download/qemu-doc.html)
+* [ARM PrimeCell PS2 Keyboard/Mouse Interface (PL050) - Technical Reference](http://infocenter.arm.com/help/topic/com.arm.doc.ddi0143c/DDI0143.pdf)
+* [PrimeCell UART (PL011) - Technical Reference](http://infocenter.arm.com/help/topic/com.arm.doc.ddi0183g/DDI0183G_uart_pl011_r1p5_trm.pdf)
+* [PrimeCell Color LCD Controller (PL110) - Technical Reference](http://infocenter.arm.com/help/topic/com.arm.doc.ddi0161e/DDI0161.pdf)
+* [QEMU source code](https://github.com/qemu/qemu)
+* [BCM2835 ARM Peripherals - Technical Reference](http://www.raspberrypi.org/wp-content/uploads/2012/02/BCM2835-ARM-Peripherals.pdf)
+* [C library for Broadcom BCM 2835 as used in Raspberry Pi](http://www.airspayce.com/mikem/bcm2835/)
+* [Baking Pi – Operating Systems Development](http://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/)
+* [RPi Low-level peripherals](http://elinux.org/RPi_Low-level_peripherals)
+* [RPi Framebuffer](http://elinux.org/RPi_Framebuffer)
+* [RPi SPI](http://elinux.org/RPi_SPI)
+* [ILITEK ILI9341 - Technical Reference](http://www.displayfuture.com/Display/datasheet/controller/ILI9341.pdf)
+* [Linux Framebuffer drivers for small TFT LCD display modules](https://github.com/notro/fbtft)
+* [Library for the Adafruit 2.2" SPI display](https://github.com/adafruit/Adafruit_ILI9340)
 
 
