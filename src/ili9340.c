@@ -59,10 +59,6 @@ void ili9340_draw_pixel(uint16_t x, uint16_t y, uint16_t color)
 	uint32_t offset = (y * width + x) << 1;
 	framebuffer[offset++] = (color >> 8) & 0xff;
 	framebuffer[offset] = color & 0xff;
-	//bcm2835_aux_muart_transfer_hex(x);
-	bcm2835_aux_muart_transfer_hex(y);
-	//bcm2835_aux_muart_transfer_hex(offset);
-	//bcm2835_aux_muart_transfer('|');
 }
 
 void ili9340_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)

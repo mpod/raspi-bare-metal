@@ -40,14 +40,16 @@ int run(void)
 	int pin18_state = 1;
 
 	// init LED 
-    bcm2835_gpio_fsel(16, BCM2835_GPIO_FSEL_OUTP); 
+	bcm2835_gpio_fsel(16, BCM2835_GPIO_FSEL_OUTP); 
 
 	while (1) {
 		// LED blinking
-        bcm2835_gpio_write(16, HIGH);
-        bcm2835_delayMicroseconds(20000);
-        bcm2835_gpio_write(16, LOW);
-        bcm2835_delayMicroseconds(20000);
+		/*
+		bcm2835_gpio_write(16, HIGH);
+		bcm2835_delayMicroseconds(20000);
+		bcm2835_gpio_write(16, LOW);
+		bcm2835_delayMicroseconds(20000);
+		*/
 
 		bcm2835_aux_muart_transfernb("in the loop");
 		if (!bcm2835_gpio_lev(23) && pin23_state) {

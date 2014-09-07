@@ -30,7 +30,7 @@ Download and extract ARM toolchain package from [https://launchpad.net/gcc-arm-e
 
 Install prerequisite packages.
 
-    $ sudo apt-get install libpixman-1-dev libpixman-1-0
+    $ sudo apt-get install libpixman-1-dev libpixman-1-0 libsdl-image1.2-dev
 
 Download and extract the latest stable version of QEMU from [http://wiki.qemu.org/Download](http://wiki.qemu.org/Download).
 
@@ -40,7 +40,7 @@ Download and extract the latest stable version of QEMU from [http://wiki.qemu.or
 Configure, build, install, and verify qemu-system-arm.
 
     $ cd qemu-2.1.0
-    $ ./configure --target-list=arm-softmmu,arm-linux-user
+    $ ./configure --target-list=arm-softmmu,arm-linux-user --enable-sdl
     $ make -j 2
     $ sudo make install
     $ qemu-system-arm --version
@@ -53,29 +53,72 @@ Configure, build, install, and verify qemu-system-arm.
   
 Moving controls: W, A, S, D.
 
-Framebuffer Raspberry Pi kernel image
--------------------------------------
+## Framebuffer Raspberry Pi kernel image ##
 
 Build kernel image file. Make sure to have properly configured ARM toolchain.
 
     $ cd raspi-bare-metal
     $ make fb
 
-Get a Raspberry PI SD card which has an operating system installed already. On SD card find file kernel.img and rename it to something else, such as kernel.img.original. Then, copy generated file kernel.img onto the SD card. Put the SD card into a Raspberry Pi and turn it on.
+Get a Raspberry PI SD card which has an operating system installed already. On SD card find file kernel.img and rename it to something else, such as kernel.img.original. Then, copy generated file kernel.img onto the SD card. Put the SD card into a Raspberry Pi and turn it on. For left, up, down, and right moving controls are used GPIO ports 23, 22, 21, and 18, respectively. 
 
-
-PiTFT Raspberry Pi kernel image
--------------------------------
+## PiTFT Raspberry Pi kernel image ##
 
 This image uses [Adafruit PiTFT](http://www.adafruit.com/product/1601). 
 
     $ cd raspi-bare-metal
     $ make pitft
 
-Copy file kernel.img onto the SD card. Plug PiTFT into your Raspberry Pi, insert SD card, and turn it on.
+Copy file kernel.img onto the SD card. Plug PiTFT into your Raspberry Pi, insert SD card, and turn Raspberry Pi on. For left, up, down, and right moving controls are used GPIO ports 23, 22, 21, and 18, respectively. 
 
-References
-----------
+## Debugging ##
+
+### Debugging QEMU session ###
+
+One way is to use GDB. Run QEMU kernel image with following parameters.
+
+    $ qemu-system-arm -m 128 -kernel kernel.elf -serial stdio -machine integratorcp -S -s
+
+In another console window start remote GDB session.
+
+    $ arm-none-eabi-gdb kernel.elf
+    GNU gdb (GNU Tools for ARM Embedded Processors) 7.6.0.20131129-cvs
+    Copyright (C) 2013 Free Software Foundation, Inc.
+    License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+    and "show warranty" for details.
+    This GDB was configured as "--host=i686-linux-gnu --target=arm-none-eabi".
+    For bug reporting instructions, please see:
+    <http://www.gnu.org/software/gdb/bugs/>...
+    Reading symbols from /raspi-bare-metal/kernel.elf...(no debugging symbols found)...done.
+    (gdb) target remote localhost:1234
+    Remote debugging using localhost:1234
+    0x00008010 in pl011_uart_write_char ()
+    (gdb)
+
+Another way is use of implemented UART functions that print data to stdio.
+
+    // Send string to stdio
+    void pl011_uart_write_string(const char * str);
+
+    // Send hex value to stdio
+    void pl011_uart_write_hex(uint32_t value);
+
+### Debugging Rasperry Pi ###
+
+Debugging of bare metal image on Raspberry Pi is not an easy task. The simplest method is use of OK LED for detection of interesting events. Another way is use of UART peripherals of Raspberry Pi. To connect Raspberry Pi and PC you will need [console cable](https://learn.adafruit.com/adafruits-raspberry-pi-lesson-5-using-a-console-cable). Following C functions are implemented for sending characters to UART peripherals.
+ 
+    // Initialize mini UART 
+    void bcm2835_aux_muart_init(void);
+
+    // Send string over mini UART
+    void bcm2835_aux_muart_transfernb(char* tbuf);
+
+    // Send hex value over mini UART
+    void bcm2835_aux_muart_transfer_hex(uint32_t value);
+
+## References ##
 
 * [Ray-Casting Tutorial](http://www.permadi.com/tutorial/raycast/index.html)
 * [SDL Documentation](http://wiki.libsdl.org/CategoryAPI)
@@ -94,4 +137,5 @@ References
 * [Linux Framebuffer drivers for small TFT LCD display modules](https://github.com/notro/fbtft)
 * [Library for the Adafruit 2.2" SPI display](https://github.com/adafruit/Adafruit_ILI9340)
 
+## Afterword ##
 
